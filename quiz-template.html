@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__TITLE__</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #dbe2ea;
+      --ok-bg: #ecfdf5;
+      --ok-border: #86efac;
+      --bad-bg: #fef2f2;
+      --bad-border: #fca5a5;
+      --accent: #2563eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      width: min(900px, calc(100% - 2rem));
+      margin: 2rem auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    h1 { margin-top: 0; }
+
+    .muted { color: var(--muted); }
+
+    .question-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 0.8rem;
+    }
+
+    .options {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    label.option {
+      display: block;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      background: #fff;
+    }
+
+    label.option:hover {
+      border-color: var(--accent);
+    }
+
+    input[type="radio"] {
+      margin-right: 0.6rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      border: 0;
+      background: var(--accent);
+      color: white;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #475569;
+    }
+
+    .result {
+      font-weight: bold;
+      margin-top: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .feedback {
+      margin-top: 0.9rem;
+      padding: 0.9rem;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .feedback.correct {
+      display: block;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-border);
+    }
+
+    .feedback.incorrect {
+      display: block;
+      background: var(--bad-bg);
+      border: 1px solid var(--bad-border);
+    }
+
+    .small { font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>__TITLE__</h1>
+      <p class="muted">__INTRO__</p>
+    </div>
+
+    <div id="quiz"></div>
+
+    <div class="card">
+      <div class="actions">
+        <button id="gradeBtn">Ret quiz</button>
+        <button id="resetBtn" class="secondary">Nulstil</button>
+      </div>
+      <div id="result" class="result"></div>
+    </div>
+  </div>
+
+  <script>
+    const quizData = __QUIZ_JSON__;
+
+    const quizContainer = document.getElementById('quiz');
+    const resultElement = document.getElementById('result');
+    const gradeBtn = document.getElementById('gradeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function renderQuiz() {
+      quizContainer.innerHTML = '';
+
+      quizData.forEach((item, index) => {
+        const card = document.createElement('section');
+        card.className = 'card';
+
+        const title = document.createElement('div');
+        title.className = 'question-title';
+        title.textContent = `${index + 1}. ${item.question}`;
+        card.appendChild(title);
+
+        const options = document.createElement('div');
+        options.className = 'options';
+
+        item.options.forEach((optionText, optionIndex) => {
+          const label = document.createElement('label');
+          label.className = 'option';
+
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = `question-${index}`;
+          radio.value = String(optionIndex);
+
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(optionText));
+          options.appendChild(label);
+        });
+
+        card.appendChild(options);
+
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.id = `feedback-${index}`;
+        card.appendChild(feedback);
+
+        quizContainer.appendChild(card);
+      });
+    }
+
+    function gradeQuiz() {
+      let score = 0;
+
+      quizData.forEach((item, index) => {
+        const selected = document.querySelector(`input[name="question-${index}"]:checked`);
+        const feedback = document.getElementById(`feedback-${index}`);
+
+        if (!selected) {
+          feedback.className = 'feedback incorrect';
+          feedback.innerHTML = `Intet svar valgt.<br>Korrekt svar: <strong>${item.options[item.answer]}</strong>${item.explanation ? `<br>Forklaring: ${item.explanation}` : ''}`;
+          return;
+        }
+
+        const selectedIndex = Number(selected.value);
+        if (selectedIndex === item.answer) {
+          score += 1;
+          feedback.className = 'feedback correct';
+          feedback.innerHTML = `Korrekt.${item.explanation ? `<br>Forklaring: ${item.explanation}` : ''}`;
+        } else {
+          feedback.className = 'feedback incorrect';
+          feedback.innerHTML = `Forkert.<br>Korrekt svar: <strong>${item.options[item.answer]}</strong>${item.explanation ? `<br>Forklaring: ${item.explanation}` : ''}`;
+        }
+      });
+
+      resultElement.textContent = `Resultat: ${score} / ${quizData.length}`;
+    }
+
+    function resetQuiz() {
+      document.querySelectorAll('input[type="radio"]').forEach((input) => {
+        input.checked = false;
+      });
+
+      document.querySelectorAll('.feedback').forEach((feedback) => {
+        feedback.className = 'feedback';
+        feedback.innerHTML = '';
+      });
+
+      resultElement.textContent = '';
+    }
+
+    gradeBtn.addEventListener('click', gradeQuiz);
+    resetBtn.addEventListener('click', resetQuiz);
+
+    renderQuiz();
+  </script>
+</body>
+</html>
