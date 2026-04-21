@@ -14,6 +14,22 @@ Et Python-script der konverterer Markdown-filer til interaktive HTML-quizzer.
 
 Kræver Python 3.7+. Ingen eksterne afhængigheder nødvendige.
 
+### Opsætning til udvikling (med tests)
+
+```bash
+pip install pytest
+```
+
+## Test
+
+Kør test-suite:
+
+```bash
+python -m pytest test_build_quiz.py -v
+```
+
+Test-suiten dækker parsing-logikken, validering og edge cases.
+
 ## Brug
 
 ```bash

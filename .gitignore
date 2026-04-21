@@ -7,6 +7,10 @@ __pycache__/
 *$py.class
 *.so
 
+# pytest
+.pytest_cache/
+.coverage
+
 # Virtual environments
 venv/
 env/
