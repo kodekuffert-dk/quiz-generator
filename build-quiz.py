@@ -199,7 +199,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div class="card">
       <h1>{title}</h1>
       <p class="muted">{intro}</p>
-      <p class="small">Åbn filen direkte i browseren. Al logik ligger i denne HTML-fil, så der er ingen server involveret.</p>
     </div>
 
     <div id="quiz"></div>
